@@ -4,26 +4,63 @@
 <div class="container-fluid vh-100 d-flex flex-column">
     <!-- Chat Messages Area -->
     <div class="flex-grow-1 overflow-auto p-4" id="chat-box">
-        {% for q in queries %}
-        <div class="mb-2">
-            {{ q.msg }}
+        <div class="row overflow-auto" id="messages">
+            {% for q in queries %}
+            {% if q.is_user %}
+            <div class="col col-6 offset-6 bg-primary text-white p-2 rounded mb-3">
+                {{ q.msg }}
+            </div>
+            {% else %}
+            <div class="col col-6 bg-secondary text-dark p-2 rounded">
+                {{ q.msg }}
+            </div>
+            {% endif %}
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 
     <!-- Chat Input -->
-    <form action="{{ url_for('chat.chat_view', chat_id=chat_id) }}" method="POST" class="p-3 border-top">
+    <form id="chatForm" action="{{ url_for('chat.chat_view', chat_id=chat_id) }}" method="POST" class="p-3 border-top">
         <div class="input-group">
             <textarea id="chatInput" class="form-control" name="query" placeholder="Type a message..." required oninput="autoResize(this)"></textarea>
-            <button class="btn btn-primary">Send</button>
+            <button class="btn btn-primary" type="submit">Send</button>
         </div>
     </form>
 </div>
+
 <script>
+    document.getElementById("chatForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the form from reloading the page
+
+        let form = event.target;
+        let formData = new FormData(form);
+        let chatInput = document.getElementById("chatInput");
+        let chatBox = document.getElementById("messages");
+
+        fetch(form.action, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())  // Expect JSON response
+        .then(data => {
+            if (data.success) {
+                let newMessage = document.createElement("div");
+                newMessage.classList.add("col", "col-6", "offset-6", "bg-primary", "text-white", "p-2", "rounded", "mb-3");
+                newMessage.textContent = chatInput.value;
+
+                chatBox.appendChild(newMessage); // Add new message to chat
+                chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the bottom
+                chatInput.value = ""; // Clear input field
+            } else {
+                console.error("Error sending message");
+            }
+        })
+        .catch(error => console.error("Fetch error:", error));
+    });
+
     function autoResize(textarea) {
-        textarea.style.height = "auto";  // Reset height to auto
-        textarea.style.height = (textarea.scrollHeight) + "px";  // Set height based on content
+        textarea.style.height = "auto";
+        textarea.style.height = (textarea.scrollHeight) + "px";
     }
-    </script>
-    
+</script>
 {% endblock %}
