@@ -1,41 +1,71 @@
-    {% extends 'base.html' %}
+{% extends 'base.html' %}
 
-    {% block content %}
-    <div class="row vh-100">
-        <h1>{{ g.user['username']}}</h1>
-        <!-- Center Section (Start New Chat) -->
-        <div class="col-md-12 col-12 d-flex flex-column align-items-center justify-content-center text-center">
-            <h2 class="mb-3">Start a New Chat</h2>
-            <p class="text-muted">Click the button below to start a conversation with your AI assistant.</p>
-            <a href="{{ url_for('chat.create_chat') }}">Go to Chat</a>
-
-        </div>
-        <!-- Chat History Table -->
-        <div class="col-12 mt-4 px-5">
-            <h3 class="mb-3">Chat History</h3>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Chat Title</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for chat_obj in history() %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td><a href="{{ url_for('chat.chat_view', chat_id=chat_obj.id) }}">{{ chat_obj.summary_title }}</a></td>
-                            <td>{{ chat_obj.created_at }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger"><a href="{{ url_for('chat.delete_chat', chat_id=chat_obj.id) }}">Delete</a></button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+{% block content %}
+<div class="row vh-100">
+    <h1>{{ g.user['username']}}</h1>
+    <!-- Center Section (Start New Chat) -->
+    <div class="col-md-12 col-12 d-flex flex-column align-items-center justify-content-center text-center">
+        <h2 class="mb-3">Start a New Chat</h2>
+        <p class="text-muted">Click the button below to start a conversation with your AI assistant.</p>
+        <a href="{{ url_for('chat.create_chat') }}">Go to Chat</a>
+    </div>
+    <!-- Chat History Table -->
+    <div class="col-12 mt-4 px-5">
+        <h3 class="mb-3">Chat History</h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Chat Title</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chat_obj in history() %}
+                    <tr id="chat-{{ chat_obj.id }}">
+                        <td>{{ loop.index }}</td>
+                        <td><a href="{{ url_for('chat.chat_view', chat_id=chat_obj.id) }}">{{ chat_obj.summary_title }}</a></td>
+                        <td>{{ chat_obj.created_at }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteChat('{{ chat_obj.id }}')">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-    {% endblock %}
+</div>
+
+<script>
+    // Function to delete the chat
+    function deleteChat(chatId) {
+        // Confirm deletion
+        if (confirm("Are you sure you want to delete this chat?")) {
+            fetch(`/chat/${chatId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the deleted chat row from the table
+                    const chatRow = document.getElementById('chat-' + chatId);
+                    chatRow.remove(); // Delete the chat row from UI
+                } else {
+                    alert(data.message); // Show error message if any
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while deleting the chat.");
+            });
+        }
+    }
+</script>
+
+{% endblock %}
