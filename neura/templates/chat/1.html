@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<div class="container-fluid vh-100 d-flex flex-column">
+    <!-- Chat Messages Area -->
+    <div class="flex-grow-1 overflow-auto p-4" id="chat-box">
+        <div class="row overflow-auto" id="messages">
+            {% for q in queries %}
+            {% if q.is_user %}
+            <div class="col col-6 offset-6 bg-primary text-white p-2 rounded mb-3 chat-message user">
+                {{ q.msg }}
+            </div>
+            {% else %}
+            <div class="col col-6  bg-secondary  p-2 rounded chat-message bot">
+                {{ q.msg | safe}}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Chat Input -->
+    <form id="chatForm" action="{{ url_for('chat.chat_view', chat_id=chat_id) }}" method="POST" class="p-3 border-top">
+        <div class="input-group">
+            <textarea id="chatInput" class="form-control" name="query" placeholder="Type a message..." required oninput="autoResize(this)"></textarea>
+            <button class="btn btn-primary" type="submit">Send</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById("chatForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent the form from reloading the page
+
+        let form = event.target;
+        let formData = new FormData(form);
+        let chatInput = document.getElementById("chatInput");
+        let chatBox = document.getElementById("messages");
+
+        // 1. Add the user's message immediately to the chat
+        let userMessage = document.createElement("div");
+        userMessage.classList.add("col", "col-6", "offset-6", "bg-primary", "text-white", "p-2", "rounded", "mb-3", "chat-message", "user");
+        userMessage.textContent = chatInput.value;
+        chatBox.appendChild(userMessage);
+
+        // Auto-scroll to the bottom immediately after adding the user's message
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Clear the input field
+        chatInput.value = "";
+
+        // 2. Now, fetch AI's response (after showing the user's message)
+        fetch(form.action, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())  // Expecting a JSON response from the server
+        .then(data => {
+            if (data.success) {
+                // 3. Add the AI's message to the chat after it comes back from the API
+                let aiMessage = document.createElement("div");
+                aiMessage.classList.add("col", "col-6", "bg-secondary", "text-dark", "p-2", "rounded", "chat-message", "bot");
+                aiMessage.textContent = data.ai_message;
+                chatBox.appendChild(aiMessage);
+
+                // Auto-scroll to the bottom after the AI's message is added
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                console.error("Error sending message:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Fetch error:", error);
+        });
+    });
+</script>
+
+
+
+
+
+
+{% endblock %}

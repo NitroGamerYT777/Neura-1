@@ -1,8 +1,8 @@
 import os
-from flask import Flask, render_template, g, session
-
+from flask import Flask, render_template, g, session, redirect, url_for
+from .db import get_db
 from .auth import login_required
-from .chat import get_my_history
+from .chat import get_my_history, chat_view
 
 
 def create_app():
@@ -19,7 +19,10 @@ def create_app():
     @login_required
     def home():
         # g.random_room_id = str(f'{uuid4()}')
-        return render_template('home.html', history=get_my_history)
+        return redirect(url_for('chat.create_chat'))
+
+
+        
 
     from . import db, auth,chat
     db.init_app(app)

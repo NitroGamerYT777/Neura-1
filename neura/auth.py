@@ -1,6 +1,6 @@
 import functools
 from flask import (
-    Blueprint, flash, g, get_flashed_messages, redirect, render_template, request, session, url_for
+    Blueprint, flash, g, get_flashed_messages, redirect, render_template, request, session, url_for, make_response
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 from neura.db import get_db
@@ -22,7 +22,7 @@ def register():
         db = get_db()
         error = None
 
-        if not (username and password and len(password) > 8):
+        if not (username and password and len(password) > 8 and len(username) < 25):
             error = 'You did something wrong, check it!'
 
         user = db.execute("SELECT * FROM user WHERE username = ?", (username,)).fetchone()
@@ -40,9 +40,8 @@ def register():
                     session.clear()
                     session["user_id"] = user["id"]
                     flash("Logged in successfully!", "success")
-                    return redirect(url_for("home"))
-                        
-        if error:
+                    return redirect(url_for("home"))           
+        else:
             flash(error, "danger")
     
     return render_template('auth/register.html', flash_messages=flash_messages)
@@ -75,3 +74,20 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
+
+@auth.before_request
+def redirect_logged_out_users():
+    if g.user is None and request.endpoint != 'auth.register' and request.endpoint != 'auth.login':
+        return redirect(url_for('auth.register')) 
+
+
+# @auth.before_request
+# def prevent_cache():
+#     """Prevent browser from caching authenticated pages."""
+#     if g.user is None:
+#         # Only apply for pages that need authentication
+#         response = make_response()
+#         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+#         response.headers['Pragma'] = 'no-cache'
+#         response.headers['Expires'] = '0'
+#         return response
