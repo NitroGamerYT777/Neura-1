@@ -31,17 +31,18 @@
             --neon-pink: #ff00ff;
             --neon-purple: #bc13fe;
             --dark-bg: #0a0a0a;
+            --neon-green: #00ff0d;
         }
         #chat-history{
-            background-color:rgb(19, 19, 19);
-            color: rgb(255, 0, 255);
+            background-color:var(--neon-blue);
+            color: var(--neon-blue);
         }
         #button {
             padding: 12px 20px;
             margin-left: 10px;
             background: transparent;
-            color: var(--neon-pink);
-            border: 1px solid var(--neon-pink);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -49,9 +50,9 @@
         }
 
         #button:hover {
-            background: var(--neon-pink);
+            background: var(--neon-blue);
             color: white;
-            box-shadow: 0 0 20px var(--neon-pink);
+            box-shadow: 0 0 20px var(--neon-blue);
         }
 
         @keyframes glow {
@@ -65,7 +66,71 @@
                             0 0 20px var(--neon-pink),
                             0 0 30px var(--neon-pink);
             }
-        }        
+        }    
+        #button-1 {
+            padding: 12px 20px;
+            margin-left: 10px;
+            background: transparent;
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            /* gap: 30px; */
+            text-align: right;
+        }
+
+        #button-1:hover {
+            background: var(--neon-pink);
+            color: white;
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--neon-blue),
+                            0 0 10px var(--neon-blue),
+                            0 0 15px var(--neon-blue);
+            }
+            to {
+                text-shadow: 0 0 10px var(--neon-blue),
+                            0 0 20px var(--neon-blue),
+                            0 0 30px var(--neon-blue);
+            }
+        }    
+        #button-2 {
+            padding: 12px 20px;
+            margin-left: 10px;
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            /* gap: 30px; */
+            text-align: right;
+        }
+
+        #button-2:hover {
+            background: var(--neon-green);
+            color: white;
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px var(--neon-green),
+                            0 0 10px var(--neon-green),
+                            0 0 15px var(--neon-green);
+            }
+            to {
+                text-shadow: 0 0 10px var(--neon-green),
+                            0 0 20px var(--neon-green),
+                            0 0 30px var(--neon-green);
+            }
+        }
         .chat-container {
             background-color: rgb(19, 19, 19); 
             flex-grow: 1; 
@@ -245,8 +310,12 @@
 <body>
     <div class="sidebar overflow-auto">
         <a href="{{ url_for('chat.create_chat') }}">
-            <button id="button">+New Chat</button>
+            <button id="button">➕ New Chat</button>
         </a>
+        <a href="dictionary.com">
+            <button id="button-2">🧠 My dict</button>
+        </a>
+        <a href="{{ url_for('auth.logout') }}"><button id="button-1">❌ Logout</button></a>
         <h5 style="color: rgb(255, 0, 255);">Neura</h5>
         <ul class="list-group list-group-flush" id="chat-history">
             {% set grouped_history = {} %}

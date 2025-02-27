@@ -8,6 +8,11 @@ from werkzeug import exceptions
 from uuid import uuid4
 from neura.db import get_db
 from .auth import login_required
+import webbrowser
+from googlesearch import search
+import os
+import glob
+import subprocess
 
 chat = Blueprint('chat', __name__, url_prefix='/chat')
 
@@ -37,9 +42,11 @@ def create_chat():
     id = f'{uuid4()}'
     get_ai_response()
     db.execute("INSERT INTO chat (id, summary_title, owner) VALUES (?, ?, ?)", (id, "Empty chat", session.get('user_id')))
-    db.commit()
-    
+    db.commit()    
     return redirect(url_for('chat.chat_view', chat_id=id))
+@chat.route('/preview')
+def preview():
+    None
 from flask import jsonify
 
 @login_required
@@ -64,6 +71,29 @@ def chat_view(chat_id):
         # Insert the user's message into the database
         db.execute('INSERT INTO query (msg, owner, chat, is_user) VALUES (?, ?, ?, ?)',
                    (user_query ,session.get('user_id'), chat_id, True))
+        # @chat.route('/search', methods=['POST'])
+        def find_website_url(site_name, num_results=1):
+            query = f"{site_name} official site"
+            results = search(query, num_results=num_results)
+            return list(results)
+
+        def search_google(user_query ):
+            query = user_query.replace("/search ", "").strip()
+            url = find_website_url(query)
+            webbrowser.open_new(url)
+        def find_and_open_file(user_query, search_dirs=["C:/", "D:/", "E:/"]):
+            file_name = user_query.replace("/open ", "").strip()
+            for directory in search_dirs:
+                for root, _, files in os.walk(directory):
+                    if file_name in files:
+                        file_path = os.path.join(root, file_name)
+                        subprocess.run(["start", "", file_path], shell=True)
+                        return file_path
+            return None
+        def register(user_query):
+            None
+        def my_dict():
+            None
         
 
 
@@ -123,4 +153,3 @@ def get_unique_date():
     dates = db.execute('SELECT DISTINCT created_at FROM chat').fetchall()
 
     return dates
-
