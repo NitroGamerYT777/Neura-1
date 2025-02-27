@@ -302,7 +302,38 @@
 .container input:checked ~ .checkmark:active {
   box-shadow: 2px 2px 3px #000000, -2px -2px 3px #3c3c3c;
 }
-
+.neura-bg {
+            position: absolute;
+            font-size: 200px;
+            color: rgba(255, 255, 255, 0.05);
+            animation: pulseGlow 4s ease-in-out infinite;
+            pointer-events: none;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .neura-text {
+            position: absolute;
+            font-size: 60px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            font-weight: 700;
+            cursor: default;
+            z-index: 1;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .neura-text span {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        @keyframes pulseGlow {
+            0% { opacity: 0.05; transform: scale(0.98) translateX(-50%); }
+            50% { opacity: 0.15; transform: scale(1) translateX(-50%); }
+            100% { opacity: 0.05; transform: scale(0.98) translateX(-50%); }
+        }
     </style>
     
     
@@ -347,6 +378,54 @@
 
     <div class="chat-container">
         <div class="chat-box p-5" id="chat-box">
+            <div class="neura-bg">Neura</div>
+            <div class="neura-text" id="neura">Neura</div>
+
+            <script>
+                const neura = document.getElementById('neura');
+                const letters = neura.textContent.split('');
+                neura.innerHTML = '';
+
+                letters.forEach((letter) => {
+                    const span = document.createElement('span');
+                    span.textContent = letter;
+                    neura.appendChild(span);
+                });
+
+                const spans = neura.querySelectorAll('span');
+
+                document.addEventListener('mousemove', (e) => {
+                    const mouseX = e.clientX;
+                    const mouseY = e.clientY;
+
+                    spans.forEach((span, index) => {
+                        const rect = span.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+                        const distance = Math.sqrt(
+                            Math.pow(mouseX - centerX, 2) +
+                            Math.pow(mouseY - centerY, 2)
+                        );
+
+                        const maxDistance = 200;
+                        if (distance < maxDistance) {
+                            const intensity = 1 - distance / maxDistance;
+                            const hue = (index * 60 + distance) % 360;
+                            span.style.textShadow = `
+                                0 0 ${10 * intensity}px hsl(${hue}, 100%, 50%),
+                                0 0 ${20 * intensity}px hsl(${hue + 20}, 80%, 50%),
+                                0 0 ${30 * intensity}px hsl(${hue + 40}, 60%, 50%)
+                            `;
+                            span.style.color = `hsl(${hue}, 100%, ${50 + 20 * intensity}%)`;
+                            span.style.transform = `scale(${1 + 0.1 * intensity})`;
+                        } else {
+                            span.style.textShadow = '0 0 5px rgba(30, 30, 40, 0.5)'; /* Moslashtirilgan effekt */
+                            span.style.color = 'rgb(30, 30, 40)'; /* Sichqoncha uzoqda bo‘lganda rang */
+                            span.style.transform = 'scale(1)';
+                        }
+                    });
+                });
+            </script>
             <div class="row overflow-auto" id="messages">
                 {% for q in queries %}
                 {% if q.is_user %}
@@ -554,4 +633,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+        
 </html>
