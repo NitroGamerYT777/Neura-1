@@ -42,7 +42,7 @@ def create_chat():
     db = get_db()
     id = f'{uuid4()}'
     db.execute("INSERT INTO chat (id, summary_title, owner) VALUES (?, ?, ?)",
-               (id, "Empty chat", session.get('user_id')))
+               (id, "Empty chat", g.user['id']))
     db.commit()    
     return redirect(url_for('chat.chat_view', chat_id=id))
 
@@ -53,7 +53,7 @@ def chat_view(chat_id):
 
     # Verify chat exists and user is the owner
     chat_info = db.execute("SELECT * FROM chat WHERE id = ? AND owner = ?",
-                           (chat_id, session.get('user_id'))).fetchone()
+                           (chat_id, g.user['id'])).fetchone()
 
     if not chat_info:
         return exceptions.NotFound()
@@ -65,13 +65,13 @@ def chat_view(chat_id):
 
         # Insert the user's message into the database
         db.execute('INSERT INTO query (msg, owner, chat, is_user) VALUES (?, ?, ?, ?)',
-                   (user_query, session.get('user_id'), chat_id, True))
+                   (user_query, g.user['id'], chat_id, True))
         db.commit()
 
         # Get the AI response
         ai_response = get_ai_response(user_query)
         db.execute('INSERT INTO query (msg, owner, chat, is_user) VALUES (?, ?, ?, ?)',
-                   (ai_response, session.get('user_id'), chat_id, False))
+                   (ai_response, g.user['id'], chat_id, False))
 
         # Check if chat summary needs to be updated
         if chat_info['summary_title'] == 'Empty chat':
@@ -99,7 +99,7 @@ def chat_view(chat_id):
 
 def get_my_history():
     db = get_db()
-    return db.execute("SELECT * FROM chat WHERE owner = ? ORDER BY created_at DESC", (session.get('user_id'), )).fetchall()
+    return db.execute("SELECT * FROM chat WHERE owner = ? ORDER BY created_at DESC", (g.user['id'], )).fetchall()
 
 @login_required
 @chat.route('/<chat_id>/delete', methods=['POST'])
@@ -108,7 +108,7 @@ def delete_chat(chat_id):
     
     # Check if the logged-in user is the owner
     chat_owner = db.execute('SELECT owner FROM chat WHERE id = ?', (chat_id,)).fetchone()
-    if not chat_owner or chat_owner['owner'] != session.get('user_id'):
+    if not chat_owner or chat_owner['owner'] != g.user['id']:
         return jsonify({'success': False, 'message': 'Permission denied'}), 403
     
     # Proceed to delete the chat
