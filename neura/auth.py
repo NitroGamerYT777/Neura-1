@@ -92,8 +92,8 @@ def load_logged_in_user():
 @auth.route('/logout')
 def logout():
     session.clear()
-    flash("You have been logged out.", "danger")
-    return redirect(url_for('home'))
+    flash("You have been logged out.", "info")
+    return redirect(url_for('auth.login'))
 
 def login_required(view):
     @functools.wraps(view)

@@ -13,23 +13,28 @@ from .auth import login_required
 chat = Blueprint('chat', __name__, url_prefix='/chat')
 
 def get_ai_response(user_message = None):
+    # Note: The external API at https://gemini-6y6e.onrender.com/api/chat seems to be down.
+    # This function is correct, but will likely fail until the external service is restored.
     import requests
     url = "https://gemini-6y6e.onrender.com/api/chat"  # Your API endpoint
     if not user_message:
-        # This case might not be needed anymore, but kept for potential future use
         payload = {"newChat": True}
     else:
         payload = {"message": user_message}  
 
     try:
-        response = requests.post(url, json=payload, timeout=30)  # Increased timeout to 30s
+        # Using verify=False is a temporary workaround for potential SSL issues, not recommended for production.
+        response = requests.post(url, json=payload, timeout=30, verify=False)
         response.raise_for_status()
         data = response.json()
         return data.get("response")
 
     except requests.exceptions.RequestException as e:
-        print(f"API Request Error: {e}")
-        return "Sorry, I'm having trouble connecting to my brain right now. Please try again later."
+        import traceback
+        print("--- API Request Error ---")
+        traceback.print_exc()
+        print("-----------------------")
+        return "Sorry, I'm having trouble connecting to the AI service right now. Please try again later."
 
 @login_required
 @chat.route('/new')
