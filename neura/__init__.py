@@ -1,6 +1,5 @@
 import os
 from flask import Flask, redirect, url_for, g, session
-from . import db
 
 def create_app():
     # create and configure the app
@@ -9,6 +8,9 @@ def create_app():
         SECRET_KEY=os.urandom(24), # More secure secret key
         DATABASE=os.path.join(app.instance_path, 'database.sqlite'),
     )
+
+    from . import db
+    db.init_app(app)
 
     @app.before_request
     def load_logged_in_user():
@@ -26,7 +28,6 @@ def create_app():
         return redirect(url_for('chat.create_chat'))
 
     from . import auth, chat
-    db.init_app(app)
 
     app.register_blueprint(auth.auth)
     app.register_blueprint(chat.chat)
