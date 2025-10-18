@@ -17,7 +17,7 @@ CREATE TABLE query (
     msg TEXT NOT NULL,
     is_user BOOL,
     owner INTEGER NOT NULL,
-    chat INTEGER NOT NULL,
+    chat VARCHAR(255) NOT NULL,
     FOREIGN KEY (owner) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY (chat) REFERENCES chat(id) ON DELETE CASCADE
 );

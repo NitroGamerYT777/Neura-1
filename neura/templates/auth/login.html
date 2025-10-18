@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Register{% endblock %}</h1>
+  <h1>{% block title %}Log In{% endblock %}</h1>
 {% endblock %}
 
 <script>
@@ -25,9 +25,9 @@
 </div>
 {% block content %}
 <div class="auth-container mt-5">
-    <h2 class="text-center mb-4">Register</h2>
+    <h2 class="text-center mb-4">Log In</h2>
 
-    <form action="{{ url_for('auth.register') }}" method="POST" class="needs-validation" novalidate>
+    <form action="{{ url_for('auth.login') }}" method="POST" class="needs-validation" novalidate>
        <div class="row justify-content-center">
         <div class="col col-6">
             <div class="form-floating mb-3">
@@ -39,19 +39,21 @@
         <div class="col-12"></div>
         <div class="col col-6">
             <div class="form-floating mb-3">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required minlength="8">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
                 <label for="password">Password</label>
-                <div class="invalid-feedback">Password must be at least 8 characters.</div>
+                <div class="invalid-feedback">Please enter your password.</div>
             </div>
         </div>
         <div class="col-12"></div>
         <div class="col-6">
-            <button type="submit" class="btn-custom">Register</button>
+            <button type="submit" class="btn-custom">Log In</button>
         </div>
        </div>
+
+
     </form>
     <div class="text-center mt-3">
-        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log In</a></p>
+        <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></p>
     </div>
 </div>
 {% endblock %}
