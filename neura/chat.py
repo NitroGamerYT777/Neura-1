@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug import exceptions
 
 from uuid import uuid4
-from neura.db import get_db
+from .db import get_db
 from .auth import login_required
 
 
@@ -94,9 +94,8 @@ def chat_view(chat_id):
     # For a GET request, render the page with chat history
     queries = db.execute('SELECT * FROM query WHERE chat = ? ORDER BY id', (chat_id,)).fetchall()
     history = get_my_history()
-    dates = get_unique_date()
 
-    return render_template('chat/chat_home.html', chat_id=chat_id, queries=queries, history=history, dates=dates)
+    return render_template('chat/chat_home.html', chat_id=chat_id, queries=queries, history=history)
 
 def get_my_history():
     db = get_db()
@@ -118,10 +117,3 @@ def delete_chat(chat_id):
     db.commit()
 
     return jsonify({'success': True, 'message': 'Chat has been deleted'})
-
-def get_unique_date():
-    db = get_db()
-    # Fetch distinct dates only for the current user's chats
-    dates = db.execute("SELECT DISTINCT DATE(created_at) as chat_date FROM chat WHERE owner = ? ORDER BY chat_date DESC",
-                       (session.get('user_id'),)).fetchall()
-    return dates
