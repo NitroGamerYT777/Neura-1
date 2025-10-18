@@ -1,34 +1,26 @@
 import os
-from flask import Flask, render_template, g, session, redirect, url_for
-from .db import get_db
-from .auth import login_required
-from .chat import get_my_history, chat_view
-
+from flask import Flask, redirect, url_for
 
 def create_app():
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY='aoishdosiaoashdasoi',
+        SECRET_KEY='dev', # Should be overridden in production
         DATABASE=os.path.join(app.instance_path, 'database.sqlite'),
     )
-    
-
 
     @app.route('/')
-    @login_required
     def home():
-        # g.random_room_id = str(f'{uuid4()}')
+        # Redirect to create a new chat, which requires login
         return redirect(url_for('chat.create_chat'))
 
-
-        
-
-    from . import db, auth,chat
+    from . import db, auth, chat
     db.init_app(app)
 
     app.register_blueprint(auth.auth)
     app.register_blueprint(chat.chat)
+
+    # Ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
     except OSError:
