@@ -22,7 +22,7 @@ def get_ai_response(user_message = None):
         payload = {"message": user_message}  
 
     try:
-        response = requests.post(url, json=payload, timeout=20)  # Increased timeout
+        response = requests.post(url, json=payload, timeout=30)  # Increased timeout to 30s
         response.raise_for_status()
         data = response.json()
         return data.get("response")
